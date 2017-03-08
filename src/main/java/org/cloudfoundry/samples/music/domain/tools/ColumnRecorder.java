@@ -1,35 +1,42 @@
 package org.cloudfoundry.samples.music.domain.tools;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLDataException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by shijian on 07/03/2017.
  */
 @Component
+@Scope("singleton")
 public class ColumnRecorder {
 
     // singleton
-    private static ColumnRecorder instance = null;
-
+//    private static ColumnRecorder instance = null;
+//
     private List<String> columns = new ArrayList();
 
-    protected ColumnRecorder() { }
+    ColumnRecorder() {
 
-    public static ColumnRecorder getInstance() {
-        if(instance == null) {
-            instance = new ColumnRecorder();
-        }
-        return instance;
     }
+//
+//    protected ColumnRecorder() { }
+//
+//    public static ColumnRecorder getInstance() {
+//        if(instance == null) {
+//            instance = new ColumnRecorder();
+//        }
+//        return instance;
+//    }
 
     // functionalities
     @Autowired
-    private TableRefactor tableRefactor;
+    public TableRefactor tableRefactor;
 
     public void addColumn(String column) throws SQLDataException {
         tableRefactor.addColumn(column);
@@ -40,6 +47,23 @@ public class ColumnRecorder {
         tableRefactor.deleteColumn(column);
         columns.remove(column);
     }
+
+    /**
+     * Return extra columns in the keySet.
+     * Empty if it includes everything.
+     * @param keySet
+     * @return
+     */
+    public List<String> diff(Set<String> keySet) {
+        if(columns.containsAll(keySet)) {
+            return new ArrayList();
+        }
+        List<String> res = new ArrayList<>();
+        keySet.removeAll(columns);
+        res.addAll(keySet);
+        return res;
+    }
+
 
     public List<String> getColumns() {
         return columns;

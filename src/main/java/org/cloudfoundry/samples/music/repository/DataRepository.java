@@ -1,7 +1,9 @@
 package org.cloudfoundry.samples.music.repository;
 
 import org.cloudfoundry.samples.music.domain.DataObject;
+import org.cloudfoundry.samples.music.domain.tools.ColumnRecorder;
 import org.cloudfoundry.samples.music.repository.generators.DataQueryGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,13 @@ public class DataRepository {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @Autowired
+    ColumnRecorder columnRecorder;
+
     // TODO
     public void addColumnIfNotExist(String col) {
         jdbcTemplate.execute("");
     }
-
 
     // following methods are for CRUD
     public Map<String, Object> findOne(DataObject dataObject, String table) {
@@ -48,17 +52,25 @@ public class DataRepository {
         return jdbcTemplate.queryForList(cq.SELECT());
     }
 
-    public List<Map<String, Object>> insertItem(DataObject dataObject, String table) throws SQLDataException {
+    public List<Map<String, Object>> save(DataObject dataObject, String table) {
+        // TODO: check columns changes.
+        for(String col : columnRecorder.diff(dataObject.getContent().keySet())) {
+            try {
+                columnRecorder.addColumn(col);
+            } catch (SQLDataException e) { }
+        }
         DataQueryGenerator cq = new DataQueryGenerator(table);
         jdbcTemplate.update(cq.INSERT(dataObject));
         return jdbcTemplate.queryForList(cq.SELECT(dataObject));
     }
 
     public List<Map<String, Object>> updateItem(DataObject dataObject, String table) throws SQLDataException {
+        // TODO: check columns changes.
+        for(String col : columnRecorder.diff(dataObject.getContent().keySet())) {
+            columnRecorder.addColumn(col);
+        }
         DataQueryGenerator cq = new DataQueryGenerator(table);
-
         jdbcTemplate.update(cq.UPDATE(dataObject));
-
         return jdbcTemplate.queryForList(cq.SELECT(dataObject));
     }
 
@@ -74,6 +86,9 @@ public class DataRepository {
 
     public List<Map<String, Object>> fuzzySearch(String query, List<String> fields, String table) {
         DataQueryGenerator cq = new DataQueryGenerator(table);
+        if (fields == null) {
+            fields = columnRecorder.getColumns();
+        }
         return jdbcTemplate.queryForList(cq.fuzzyQuery(query, fields));
     }
 }

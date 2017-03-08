@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.sql.SQLDataException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,9 @@ public class MaterialController {
     @Autowired
     DataRepository repository;
 
+    @Autowired
+    ColumnRecorder columnRecorder;
+
     @Value("${my.default.table}")
     String table;
 
@@ -38,31 +42,31 @@ public class MaterialController {
 
     @RequestMapping(value = "/columns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<String> columns() {
-        return ColumnRecorder.getInstance().getColumns();
+        return columnRecorder.getColumns();
     }
 
     @RequestMapping(
+            value = "/material",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Map<String, Object>> getMaterials(@RequestParam("query") String query){
-        logger.info("Searching for '" + query + "'");
-        return repository.fuzzySearch(query, null, table);
+        if(!query.equals("")) {
+            logger.info("Searching for '" + query + "'");
+            return repository.fuzzySearch(query, null, table);
+        }
+        return new ArrayList<Map<String, Object>>();
     }
 
-    @RequestMapping(value="/album", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value="/material", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> add(@RequestBody String json) {
         HashMap<String, Object> map = ConvertingTools.JSONStringToHashMap(json);
         DataObject data = new DataObject(map);
-        try {
-            repository.insertItem(data, table);
-        } catch (SQLDataException e) {
-            e.printStackTrace();
-        }
+        repository.save(data, table);
         logger.info("Adding object " + data.getId());
         return repository.findOne(data, table);
     }
 
-    @RequestMapping(value="/album",method = RequestMethod.PUT)
+    @RequestMapping(value="/material",method = RequestMethod.PUT)
     public Map<String, Object> update(@RequestBody String json) {
         HashMap<String, Object> map = ConvertingTools.JSONStringToHashMap(json);
         DataObject data = new DataObject(map);
@@ -75,13 +79,13 @@ public class MaterialController {
         return repository.findOne(data, table);
     }
 
-    @RequestMapping(value = "/album/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/material/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getById(@PathVariable String id) {
         logger.info("Getting object " + id);
         return repository.findOne(id, table);
     }
 
-    @RequestMapping(value = "/album/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/material/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteById(@PathVariable String id) {
         try {
             repository.deleteItem(id, table);
@@ -97,26 +101,21 @@ public class MaterialController {
         String res = "Success";
 
         HttpCSVUtils csvUtil = new HttpCSVUtils(multipart);
-        String[] rows = csvUtil.getRows();
+        List<String> rows = csvUtil.getRows();
         logger.info("Import csv file: " + multipart.getOriginalFilename());
-//        for(int i=0; i<rows.length; i++) {
-//            String[] row = csvUtil.getSingleRowData(i);
-//            if(row[csvUtil.labelIndex("_class")].endsWith("domain.Object")) {
-//                Object object = new Object(
-//                        row[csvUtil.labelIndex("title")],
-//                        row[csvUtil.labelIndex("artist")],
-//                        row[csvUtil.labelIndex("releaseYear")],
-//                        row[csvUtil.labelIndex("genre")]
-//                );
-//                repository.save(object);
-//                logger.info("Adding object: " + object.getId());
-//            }
-//        }
-//        res += " : add " + (rows.length-1) + " albums.";
+        int items = 0;
+        for(int i=0; i<rows.size(); i++) {
+            HashMap<String, Object> dataMap = csvUtil.getRowDataMap(i);
+            DataObject data = new DataObject(dataMap);
+            repository.save(data, table);
+            logger.info("Adding object: " + data.getId());
+            items++;
+        }
+        res += " : add " + items + " albums.";
+        return res;
+        }
 
-//        return res;
-        return null;
-    }
+
 
 
 }

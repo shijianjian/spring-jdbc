@@ -1,6 +1,7 @@
 package org.cloudfoundry.samples.music.domain.tools;
 
 import org.cloudfoundry.samples.music.repository.generators.TableRefactorGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,13 +22,16 @@ public class TableRefactor {
     @Value("${my.default.table}")
     private String table;
 
+    @Autowired
+    ColumnRecorder columnRecorder;
+
     @Inject
     public TableRefactor(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
     
     public void addColumn(String col) throws SQLDataException {
-        List<String> cols = ColumnRecorder.getInstance().getColumns();
+        List<String> cols = columnRecorder.getColumns();
         if(cols.contains(col.trim().toLowerCase())){
             SQLDataException e = new SQLDataException("Column exists");
             throw e;
@@ -37,7 +41,7 @@ public class TableRefactor {
     }
 
     public void deleteColumn(String col) throws SQLDataException {
-        List<String> cols = ColumnRecorder.getInstance().getColumns();
+        List<String> cols = columnRecorder.getColumns();
         if(!cols.contains(col.trim().toLowerCase())){
             SQLDataException e = new SQLDataException("Column not exists");
             throw e;
@@ -47,7 +51,7 @@ public class TableRefactor {
     }
 
     public void renameColumn(String oldCol, String newCol) throws SQLDataException {
-        List<String > cols = ColumnRecorder.getInstance().getColumns();
+        List<String > cols = columnRecorder.getColumns();
         if(!cols.contains(oldCol.trim().toLowerCase())){
             SQLDataException e = new SQLDataException("Column "+ oldCol.trim().toLowerCase() +" not exists");
             throw e;

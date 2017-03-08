@@ -1,8 +1,6 @@
 package org.cloudfoundry.samples.music.domain;
 
-import org.cloudfoundry.samples.music.domain.tools.ColumnRecorder;
-
-import java.sql.SQLDataException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +16,7 @@ public class DataObject {
 
     public DataObject(Map<String, Object> content) {
         this.content = content;
+        this.columns = new ArrayList<>();
         idDistributor();
         columnCollector();
     }
@@ -46,34 +45,6 @@ public class DataObject {
     private void columnCollector() {
         for(Map.Entry<String, Object> item : content.entrySet()) {
             columns.add(item.getKey().toString());
-        }
-    }
-
-    /**
-     * Check every column is recorded or not.
-     */
-    public boolean IsAllColumnsRecorded() {
-        ColumnRecorder columnRecorder = ColumnRecorder.getInstance();
-        List<String> cols = columns;
-        cols.removeAll(columnRecorder.getColumns());
-        if(cols.isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * put all columns to table.
-     */
-    public void recordColumns() throws SQLDataException {
-        ColumnRecorder columnRecorder = ColumnRecorder.getInstance();
-        List<String> cols = columns;
-        cols.removeAll(columnRecorder.getColumns());
-        if(cols.isEmpty()) {
-            return;
-        }
-        for(String col : cols) {
-            columnRecorder.addColumn(col);
         }
     }
 

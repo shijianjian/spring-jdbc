@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cloudfoundry.samples.music.domain.tools.ColumnRecorder;
 import org.cloudfoundry.samples.music.repository.generators.TableRefactorGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,6 +30,9 @@ public class TableInitializer {
     @Value("${my.default.table}")
     private String table;
 
+    @Autowired
+    ColumnRecorder columnRecorder;
+
     @Inject
     public TableInitializer(DataSource dataSource) throws SQLDataException {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -36,19 +40,23 @@ public class TableInitializer {
 
     @PostConstruct
     private void tableInitialization() {
-        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \""+table+"\"( \"id\" SERIAL primary key);");
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \""+table+"\"( \"id\" VARCHAR(50) primary key);");
+        jdbcTemplate.execute(String.format("ALTER TABLE %s ALTER COLUMN %s TYPE VARCHAR(50);", table, "id"));
+
         logger.info("Create/find table '" + table + "'");
     }
 
     @PostConstruct
     private void columnInitialization() throws SQLDataException {
-        Map<String, Object> map = jdbcTemplate.queryForMap(new TableRefactorGenerator(table).getColumns());
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(new TableRefactorGenerator(table).getColumns());
         List<String> cols = new ArrayList<>();
-        for(Map.Entry<String, Object> entry: map.entrySet()){
-            cols.add(entry.getValue().toString());
-            logger.info("Find column '" + entry.getValue().toString() +"'");
+        for (Map<String, Object> map : list) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                cols.add(entry.getValue().toString());
+                logger.info("Find column '" + entry.getValue().toString() + "'");
+            }
         }
-        ColumnRecorder.getInstance().setColumns(cols);
+        columnRecorder.setColumns(cols);
     }
 
 }
