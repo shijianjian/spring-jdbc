@@ -10,9 +10,13 @@ $ ./gradlew bootRun
 The application can be pushed to cloud foundry using the following command:
 ~~~
 $ ./gradlew assemble
-$ cf push
 ~~~
 
+Since we are using spring boot 1.5.
+While pushing, using the following command which is pointing to java_buildpack 3.14 instead of the default version.
+~~~
+$ cf push -b https://github.com/cloudfoundry/java-buildpack.git#26cf03b
+~~~
 The application will use the settings in the 'manifest.yml' file.
 
 #### Cloud Foundry Usage
