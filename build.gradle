@@ -1,0 +1,77 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.1.RELEASE'
+        springCloudConnectorsVersion = '1.2.3.RELEASE'
+    }
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url "https://repo.spring.io/plugins-release" }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+
+apply plugin: 'eclipse-wtp'
+apply plugin: 'idea'
+
+apply plugin: 'org.springframework.boot'
+
+version = '1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa"
+
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-config
+    compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.1.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '4.2.1.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-config', version: '4.2.1.RELEASE'
+    // https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.0.12.RELEASE'
+
+
+    // Spring Cloud Connectors
+    compile "org.springframework.cloud:spring-cloud-core:${springCloudConnectorsVersion}"
+    compile "org.springframework.cloud:spring-cloud-spring-service-connector:${springCloudConnectorsVersion}"
+    compile "org.springframework.cloud:spring-cloud-cloudfoundry-connector:${springCloudConnectorsVersion}"
+
+    // JPA Persistence
+    compile "commons-dbcp:commons-dbcp"
+    runtime "postgresql:postgresql:9.1-901-1.jdbc4"
+
+    // JSON reader https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.7'
+
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.8.Final'
+    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.2.8.Final'
+
+    // https://mvnrepository.com/artifact/javax.inject/javax.inject
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
+    // Testing
+    testCompile "junit:junit"
+}
+
+jar {
+    baseName = "spring-music"
+    version = "" // omit the version from the war file name
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.14'
+}
