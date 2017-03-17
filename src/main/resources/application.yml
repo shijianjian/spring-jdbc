@@ -3,3 +3,15 @@
 spring:
   jpa:
     generate-ddl: true
+security:
+  oauth2:
+    client:
+      clientId: foo
+      clientSecret: foo
+      accessTokenUri: https://2f2bd91e-3b1b-4e16-9838-7f697b13c47e.predix-uaa.run.aws-usw02-pr.ice.predix.io/oauth/token
+      userAuthorizationUri: https://2f2bd91e-3b1b-4e16-9838-7f697b13c47e.predix-uaa.run.aws-usw02-pr.ice.predix.io/oauth/authorize
+      tokenName: oauth_token
+      authenticationScheme: query
+      clientAuthenticationScheme: form
+    resource:
+      userInfoUri:  https://2f2bd91e-3b1b-4e16-9838-7f697b13c47e.predix-uaa.run.aws-usw02-pr.ice.predix.io/userinfo
