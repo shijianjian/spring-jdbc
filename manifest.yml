@@ -1,8 +1,8 @@
 ---
 applications:
-- name: jdbc-spring-music
+- name: uaa-spring-music-test
   path: build/libs/spring-music.jar
-  buildpack: java_buildpack
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git#26cf03b
   memory: 512M
   services:
       - postgresTest

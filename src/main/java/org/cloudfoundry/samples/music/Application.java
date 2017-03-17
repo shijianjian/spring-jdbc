@@ -20,12 +20,12 @@ public class Application extends SpringBootServletInitializer {
                 .application()
                 .run(args);
 
-        if(devProfile){
-            System.setProperty("http.proxyHost", "2f2bd91e-3b1b-4e16-9838-7f697b13c47e");
-            System.setProperty("http.proxyPort", "8080");
-            System.setProperty("https.proxyHost", "2f2bd91e-3b1b-4e16-9838-7f697b13c47e");
-            System.setProperty("https.proxyPort", "8080");
-        }
+//        if(devProfile){
+//            System.setProperty("http.proxyHost", "2f2bd91e-3b1b-4e16-9838-7f697b13c47e");
+//            System.setProperty("http.proxyPort", "8080");
+//            System.setProperty("https.proxyHost", "2f2bd91e-3b1b-4e16-9838-7f697b13c47e");
+//            System.setProperty("https.proxyPort", "8080");
+//        }
     }
 
 
