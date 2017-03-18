@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -23,6 +25,7 @@ import java.util.Map;
 @RestController
 @CrossOrigin
 @RequestMapping
+@EnableResourceServer
 public class MaterialController {
     private static final Logger logger = LoggerFactory.getLogger(MaterialController.class);
 
@@ -115,6 +118,10 @@ public class MaterialController {
         return res;
         }
 
+
+    public void configure(ResourceServerSecurityConfigurer resource) throws Exception{
+        resource.resourceId("openid");
+    }
 
 
 
