@@ -37,6 +37,9 @@ public class DataObject {
         if(content.containsKey("id")){
             id = content.get("id").toString().trim();
             content.remove("id", id);
+            if(id == "") {
+                id = generateId();
+            }
         } else {
             id = generateId();
         }
