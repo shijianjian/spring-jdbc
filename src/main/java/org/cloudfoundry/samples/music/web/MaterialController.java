@@ -1,5 +1,6 @@
 package org.cloudfoundry.samples.music.web;
 
+import org.cloudfoundry.samples.music.config.security.CORSConfig;
 import org.cloudfoundry.samples.music.domain.DataObject;
 import org.cloudfoundry.samples.music.domain.tools.ColumnRecorder;
 import org.cloudfoundry.samples.music.repository.DataRepository;
@@ -9,9 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -26,8 +31,28 @@ import java.util.Map;
 @CrossOrigin
 @RequestMapping
 @EnableResourceServer
-public class MaterialController {
+public class MaterialController extends ResourceServerConfigurerAdapter {
+
     private static final Logger logger = LoggerFactory.getLogger(MaterialController.class);
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resource) throws Exception{
+        resource.resourceId("openid").stateless(true);
+    }
+
+    @Bean
+    CORSConfig corsConfig() {
+        CORSConfig filter = new CORSConfig();
+        return filter;
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .addFilterBefore(new CORSConfig(), ChannelProcessingFilter.class)
+                .authorizeRequests().anyRequest().authenticated();
+    }
 
     @Autowired
     DataRepository repository;
@@ -117,12 +142,5 @@ public class MaterialController {
         res += " : add " + items + " albums.";
         return res;
         }
-
-
-    public void configure(ResourceServerSecurityConfigurer resource) throws Exception{
-        resource.resourceId("openid");
-    }
-
-
 
 }
