@@ -15,7 +15,7 @@ public class PostgresLocalDataSourceConfig extends AbstractLocalDataSourceConfig
         System.out.println("############################");
         System.out.println("Using postgres local service");
         System.out.println("############################");
-        return createDataSource("jdbc:postgresql://localhost:5432/music",
+        return createDataSource("jdbc:postgresql://localhost:5432/postgres",
                 "org.postgresql.Driver", "postgres", "postgres");
     }
 

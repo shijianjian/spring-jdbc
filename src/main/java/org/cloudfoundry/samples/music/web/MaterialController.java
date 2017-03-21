@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -31,19 +30,15 @@ import java.util.Map;
 @CrossOrigin
 @RequestMapping
 @EnableResourceServer
-public class MaterialController extends ResourceServerConfigurerAdapter {
+public class MaterialController
+        extends ResourceServerConfigurerAdapter
+{
 
     private static final Logger logger = LoggerFactory.getLogger(MaterialController.class);
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resource) throws Exception{
         resource.resourceId("openid").stateless(true);
-    }
-
-    @Bean
-    CORSConfig corsConfig() {
-        CORSConfig filter = new CORSConfig();
-        return filter;
     }
 
     @Override

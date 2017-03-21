@@ -1,6 +1,8 @@
 package org.cloudfoundry.samples.music.config.security;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +13,7 @@ import java.io.IOException;
  * Created by shijian on 21/02/2017.
  */
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORSConfig implements Filter {
 
     @Override
@@ -20,8 +23,8 @@ public class CORSConfig implements Filter {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE, PATCH");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-        response.setHeader("Access-Control-Expose-Headers", "Location"); // expose authorization header to CORS
+        response.setHeader("Access-Control-Allow-Headers", "Access-Control-Request-Headers, Origin, x-requested-with, Content-Type, Accept, authorization");
+        response.setHeader("Access-Control-Request-Headers", "Authorization, Accept, Content-Type");
         chain.doFilter(req, res);
     }
 
