@@ -1,6 +1,6 @@
 ---
 applications:
-- name: uaa-spring-music-test
+- name: jdbc-spring-music
   path: build/libs/spring-music.jar
   buildpack: https://github.com/cloudfoundry/java-buildpack.git#26cf03b
   memory: 512M

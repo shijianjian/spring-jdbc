@@ -23,7 +23,7 @@ public class CORSConfig implements Filter {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE, PATCH");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "Access-Control-Request-Headers, Origin, x-requested-with, Content-Type, Accept, authorization");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, x-requested-with, Content-Type, Accept, authorization");
         response.setHeader("Access-Control-Request-Headers", "Authorization, Accept, Content-Type");
         chain.doFilter(req, res);
     }
