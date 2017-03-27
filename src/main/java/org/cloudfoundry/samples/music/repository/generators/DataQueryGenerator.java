@@ -78,8 +78,14 @@ public class DataQueryGenerator {
             list.add("LOWER(" + field + ")");
         }
         String col = String.join("||", list);
+        String[] queryArray = query.trim().split(" ");
+        String condition = "";
+        for(int i=0; i<queryArray.length; i++) {
+            condition += String.format("AND ((%s) LIKE LOWER('%%%s%%')) ", col, queryArray[i]);
+        }
+        condition = condition.substring(condition.indexOf("AND") + "AND".length());
         // using %% to escape %
-        String sql = String.format("SELECT * FROM %s WHERE (%s) LIKE LOWER('%%%s%%');", table, col, query);
+        String sql = String.format("SELECT * FROM %s WHERE (%s);", table, condition);
         System.out.println("sql = " + sql);
         return sql;
     }
