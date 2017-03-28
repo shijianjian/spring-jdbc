@@ -2,6 +2,7 @@ package org.cloudfoundry.samples.music.tools;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,7 +56,11 @@ public class HttpCSVUtils {
         List<String> labels = getLabels();
         HashMap<String, Object> dataMap = new HashMap<>();
         for(int i=0; i<labels.size(); i++) {
-            dataMap.put(labels.get(i), currentData.get(i));
+            try {
+                dataMap.put(labels.get(i), currentData.get(i));
+            } catch (IndexOutOfBoundsException e) {
+                dataMap.put(labels.get(i), " ");
+            }
         }
         return dataMap;
     }
