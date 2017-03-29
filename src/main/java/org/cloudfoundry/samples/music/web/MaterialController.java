@@ -110,17 +110,13 @@ public class MaterialController
 
     @RequestMapping(value = "/material/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteById(@PathVariable String id) {
-        try {
-            repository.deleteItem(id, table);
-        } catch (SQLDataException e) {
-            e.printStackTrace();
-        }
+        repository.deleteItem(id, table);
         logger.info("Deleting object " + id);
         return "Deleted";
     }
 
-    @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
-    public String handleFileUpload(@RequestParam("file") MultipartFile multipart, RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/appendcsv", method = RequestMethod.POST)
+    public String handleFileAppend(@RequestParam("file") MultipartFile multipart, RedirectAttributes redirectAttributes) {
         String res = "Success";
 
         HttpCSVUtils csvUtil = new HttpCSVUtils(multipart);
@@ -136,6 +132,31 @@ public class MaterialController
         }
         res += " : add " + items + " albums.";
         return res;
+    }
+
+    @RequestMapping(value = "/importcsv", method = RequestMethod.POST)
+    public String handleFileImport(@RequestParam("file") MultipartFile multipart, RedirectAttributes redirectAttributes) {
+        String res = "Success";
+
+        repository.deleteAll(table);
+        columnRecorder.deleteAllColumns();
+        try {
+            columnRecorder.addColumn("id");
+        } catch (SQLDataException e) { e.printStackTrace(); }
+
+        HttpCSVUtils csvUtil = new HttpCSVUtils(multipart);
+        List<String> rows = csvUtil.getRows();
+        logger.info("Import csv file: " + multipart.getOriginalFilename());
+        int items = 0;
+        for(int i=0; i<rows.size(); i++) {
+            HashMap<String, Object> dataMap = csvUtil.getRowDataMap(i);
+            DataObject data = new DataObject(dataMap);
+            repository.save(data, table);
+            logger.info("Adding object: " + data.getId());
+            items++;
         }
+        res += " : import " + items + " albums.";
+        return res;
+    }
 
 }

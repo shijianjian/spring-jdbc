@@ -74,12 +74,17 @@ public class DataRepository {
         return jdbcTemplate.queryForList(cq.SELECT(dataObject));
     }
 
-    public void deleteItem(DataObject dataObject, String table) throws SQLDataException {
+    public void deleteItem(DataObject dataObject, String table) {
         DataQueryGenerator cq = new DataQueryGenerator(table);
         jdbcTemplate.update(cq.DELETE(dataObject));
     }
 
-    public void deleteItem(String id, String table) throws SQLDataException {
+    public void deleteAll(String table){
+        DataQueryGenerator cq = new DataQueryGenerator(table);
+        jdbcTemplate.update(cq.DELETEALL());
+    }
+
+    public void deleteItem(String id, String table){
         DataQueryGenerator cq = new DataQueryGenerator(table);
         jdbcTemplate.update(cq.DELETE(id));
     }

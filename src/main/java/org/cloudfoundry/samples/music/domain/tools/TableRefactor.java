@@ -50,6 +50,14 @@ public class TableRefactor {
         jdbcTemplate.update(tgen.dropColumn(col.trim().toLowerCase()));
     }
 
+    public void deleteAllColumns() {
+        List<String> cols = columnRecorder.getColumns();
+        TableRefactorGenerator tgen = new TableRefactorGenerator(table);
+        for(String col : cols) {
+            jdbcTemplate.update(tgen.dropColumn(col));
+        }
+    }
+
     public void renameColumn(String oldCol, String newCol) throws SQLDataException {
         List<String > cols = columnRecorder.getColumns();
         if(!cols.contains(oldCol.trim().toLowerCase())){

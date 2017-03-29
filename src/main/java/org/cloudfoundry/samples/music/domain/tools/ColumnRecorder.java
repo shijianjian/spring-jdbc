@@ -16,25 +16,8 @@ import java.util.Set;
 @Scope("singleton")
 public class ColumnRecorder {
 
-    // singleton
-//    private static ColumnRecorder instance = null;
-//
     private List<String> columns = new ArrayList();
 
-    ColumnRecorder() {
-
-    }
-//
-//    protected ColumnRecorder() { }
-//
-//    public static ColumnRecorder getInstance() {
-//        if(instance == null) {
-//            instance = new ColumnRecorder();
-//        }
-//        return instance;
-//    }
-
-    // functionalities
     @Autowired
     public TableRefactor tableRefactor;
 
@@ -46,6 +29,11 @@ public class ColumnRecorder {
     public void deleteColumn(String column) throws SQLDataException {
         tableRefactor.deleteColumn(column);
         columns.remove(column);
+    }
+
+    public void deleteAllColumns(){
+        tableRefactor.deleteAllColumns();
+        columns.removeAll(columns);
     }
 
     /**
@@ -63,7 +51,6 @@ public class ColumnRecorder {
         res.addAll(keySet);
         return res;
     }
-
 
     public List<String> getColumns() {
         return columns;

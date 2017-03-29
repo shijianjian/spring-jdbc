@@ -63,6 +63,12 @@ public class DataQueryGenerator {
         return sql;
     }
 
+    public String DELETEALL() {
+        String sql = String.format("DELETE FROM %s;", table);
+        System.out.println("sql = " + sql);
+        return sql;
+    }
+
     /**
      * Search all the fields if fields is null.
      * @param query
@@ -89,7 +95,6 @@ public class DataQueryGenerator {
         System.out.println("sql = " + sql);
         return sql;
     }
-
 
     private void fieldBuilder(DataObject dataObject) {
         StringBuffer field = new StringBuffer();

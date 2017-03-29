@@ -2,7 +2,6 @@ package org.cloudfoundry.samples.music.tools;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,18 +31,6 @@ public class HttpCSVUtils {
 
     public List<String> getLabels() { return labels; }
 
-    /**
-     * return -1 if there is no such label
-     * @param label
-     * @return
-     */
-//    public int labelIndex(String label) {
-//        for(int i=0; i<labels.length; i++) {
-//            if(label.trim().toLowerCase().equals(labels[i].trim().toLowerCase()))
-//                return i;
-//        }
-//        return -1;
-//    }
 
     public List<String> getSingleRowData(Integer index) {
         String[] data = rows.get(index).trim().split(",");
