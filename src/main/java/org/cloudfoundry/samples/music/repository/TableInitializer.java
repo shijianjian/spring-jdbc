@@ -41,6 +41,7 @@ public class TableInitializer {
     @PostConstruct
     private void tableInitialization() {
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \""+table+"\"( \"id\" VARCHAR(50) primary key);");
+        jdbcTemplate.execute("Alter TABLE " + table + " ADD COLUMN IF NOT EXISTS id VARCHAR(50)");
         jdbcTemplate.execute(String.format("ALTER TABLE %s ALTER COLUMN %s TYPE VARCHAR(50);", table, "id"));
 
         logger.info("Create/find table '" + table + "'");

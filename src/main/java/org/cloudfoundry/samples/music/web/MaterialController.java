@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -86,7 +88,12 @@ public class MaterialController
         DataObject data = new DataObject(map);
         repository.save(data, table);
         logger.info("Adding object " + data.getId());
-        return repository.findOne(data, table);
+        try {
+            return repository.findOne(data, table);
+        } catch (EmptyResultDataAccessException e) {
+            logger.error("Can not find data at table --"+table+"-- : " + data);
+        }
+        return new HashMap<>();
     }
 
     @RequestMapping(value="/material",method = RequestMethod.PUT)
@@ -95,23 +102,37 @@ public class MaterialController
         DataObject data = new DataObject(map);
         try {
             repository.updateItem(data, table);
+            logger.info("Updating object " + data.getId());
         } catch (SQLDataException e) {
             e.printStackTrace();
         }
-        logger.info("Updating object " + data.getId());
-        return repository.findOne(data, table);
+        try {
+            return repository.findOne(data, table);
+        } catch (EmptyResultDataAccessException e) {
+            logger.error("Can not find data at table --"+table+"-- : " + data);
+        }
+        return new HashMap<>();
     }
 
     @RequestMapping(value = "/material/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getById(@PathVariable String id) {
         logger.info("Getting object " + id);
-        return repository.findOne(id, table);
+        try {
+            return repository.findOne(id, table);
+        } catch (EmptyResultDataAccessException e) {
+            logger.error("Can not find data at table --"+table+"-- : " + id);
+        }
+        return new HashMap<>();
     }
 
     @RequestMapping(value = "/material/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteById(@PathVariable String id) {
-        repository.deleteItem(id, table);
-        logger.info("Deleting object " + id);
+        try {
+            repository.deleteItem(id, table);
+            logger.info("Deleting object " + id);
+        } catch (DataAccessException e) {
+            logger.error("Can not find data at table --"+table+"-- : " + id);
+        }
         return "Deleted";
     }
 
@@ -121,6 +142,11 @@ public class MaterialController
 
         HttpCSVUtils csvUtil = new HttpCSVUtils(multipart);
         List<String> rows = csvUtil.getRows();
+
+        try {
+            columnRecorder.addColumns(csvUtil.getLabels());
+        } catch (SQLDataException e) { e.printStackTrace(); }
+
         logger.info("Import csv file: " + multipart.getOriginalFilename());
         int items = 0;
         for(int i=0; i<rows.size(); i++) {
@@ -138,14 +164,17 @@ public class MaterialController
     public String handleFileImport(@RequestParam("file") MultipartFile multipart, RedirectAttributes redirectAttributes) {
         String res = "Success";
 
-        repository.deleteAll(table);
-        columnRecorder.deleteAllColumns();
-        try {
-            columnRecorder.addColumn("id");
-        } catch (SQLDataException e) { e.printStackTrace(); }
-
         HttpCSVUtils csvUtil = new HttpCSVUtils(multipart);
         List<String> rows = csvUtil.getRows();
+
+        repository.deleteAll(table);
+        columnRecorder.deleteAllColumns();
+
+        try {
+            columnRecorder.addColumn("id");
+            columnRecorder.addColumns(csvUtil.getLabels());
+        } catch (SQLDataException e) { e.printStackTrace(); }
+
         logger.info("Import csv file: " + multipart.getOriginalFilename());
         int items = 0;
         for(int i=0; i<rows.size(); i++) {

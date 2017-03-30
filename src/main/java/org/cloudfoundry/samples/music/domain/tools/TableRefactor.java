@@ -3,6 +3,7 @@ package org.cloudfoundry.samples.music.domain.tools;
 import org.cloudfoundry.samples.music.repository.generators.TableRefactorGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +38,11 @@ public class TableRefactor {
             throw e;
         }
         TableRefactorGenerator tgen = new TableRefactorGenerator(table);
-        jdbcTemplate.update(tgen.addColumn(col.trim().toLowerCase()));
+        try {
+            jdbcTemplate.update(tgen.addColumn(col.trim().toLowerCase()));
+        } catch (BadSqlGrammarException e) {
+            e.printStackTrace();
+        }
     }
 
     public void deleteColumn(String col) throws SQLDataException {
@@ -47,14 +52,23 @@ public class TableRefactor {
             throw e;
         }
         TableRefactorGenerator tgen = new TableRefactorGenerator(table);
-        jdbcTemplate.update(tgen.dropColumn(col.trim().toLowerCase()));
+        try{
+            jdbcTemplate.update(tgen.dropColumn(col.trim().toLowerCase()));
+        } catch (BadSqlGrammarException e) {
+            e.printStackTrace();
+        }
     }
 
     public void deleteAllColumns() {
         List<String> cols = columnRecorder.getColumns();
+        if(cols == null || cols.isEmpty()) {
+            return;
+        }
         TableRefactorGenerator tgen = new TableRefactorGenerator(table);
         for(String col : cols) {
-            jdbcTemplate.update(tgen.dropColumn(col));
+            try {
+                jdbcTemplate.update(tgen.dropColumn(col));
+            } catch (BadSqlGrammarException e) {e.printStackTrace();}
         }
     }
 

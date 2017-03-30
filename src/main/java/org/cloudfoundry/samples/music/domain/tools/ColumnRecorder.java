@@ -22,18 +22,29 @@ public class ColumnRecorder {
     public TableRefactor tableRefactor;
 
     public void addColumn(String column) throws SQLDataException {
-        tableRefactor.addColumn(column);
-        columns.add(column);
+        column = column.trim().toLowerCase();
+        if(!columns.contains(column)) {
+            tableRefactor.addColumn(column);
+            columns.add(column);
+        }
     }
 
-    public void deleteColumn(String column) throws SQLDataException {
+    public void addColumns(List<String> columns) throws SQLDataException {
+        for(String col : columns) {
+            col = col.trim().toLowerCase();
+            addColumn(col);
+        }
+    }
+
+    public void removeColumn(String column) throws SQLDataException {
+        column = column.trim().toLowerCase();
         tableRefactor.deleteColumn(column);
         columns.remove(column);
     }
 
     public void deleteAllColumns(){
         tableRefactor.deleteAllColumns();
-        columns.removeAll(columns);
+        columns = new ArrayList<>();
     }
 
     /**
@@ -43,12 +54,21 @@ public class ColumnRecorder {
      * @return
      */
     public List<String> diff(Set<String> keySet) {
-        if(columns.containsAll(keySet)) {
+        List<String> cols = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
+        for(String key : keySet) {
+            keys.add(key.trim().toLowerCase());
+        }
+        for(String col : columns) {
+            cols.add(col.trim().toLowerCase());
+        }
+        if(cols.containsAll(keys)) {
+            // return no diff
             return new ArrayList();
         }
         List<String> res = new ArrayList<>();
-        keySet.removeAll(columns);
-        res.addAll(keySet);
+        keys.removeAll(cols);
+        res.addAll(keys);
         return res;
     }
 

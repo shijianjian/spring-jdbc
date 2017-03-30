@@ -4,6 +4,8 @@ import org.cloudfoundry.samples.music.domain.DataObject;
 import org.cloudfoundry.samples.music.domain.tools.ColumnRecorder;
 import org.cloudfoundry.samples.music.repository.generators.DataQueryGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -37,12 +39,12 @@ public class DataRepository {
     }
 
     // following methods are for CRUD
-    public Map<String, Object> findOne(DataObject dataObject, String table) {
+    public Map<String, Object> findOne(DataObject dataObject, String table) throws EmptyResultDataAccessException {
         DataQueryGenerator cq = new DataQueryGenerator(table);
         return jdbcTemplate.queryForMap(cq.SELECT(dataObject));
     }
 
-    public Map<String, Object> findOne(String id, String table) {
+    public Map<String, Object> findOne(String id, String table) throws EmptyResultDataAccessException {
         DataQueryGenerator cq = new DataQueryGenerator(table);
         return jdbcTemplate.queryForMap(cq.SELECT(id));
     }
@@ -52,7 +54,7 @@ public class DataRepository {
         return jdbcTemplate.queryForList(cq.SELECT());
     }
 
-    public List<Map<String, Object>> save(DataObject dataObject, String table) {
+    public List<Map<String, Object>> save(DataObject dataObject, String table) throws DataAccessException {
         // TODO: check columns changes.
         for(String col : columnRecorder.diff(dataObject.getContent().keySet())) {
             try {
@@ -64,7 +66,7 @@ public class DataRepository {
         return jdbcTemplate.queryForList(cq.SELECT(dataObject));
     }
 
-    public List<Map<String, Object>> updateItem(DataObject dataObject, String table) throws SQLDataException {
+    public List<Map<String, Object>> updateItem(DataObject dataObject, String table) throws SQLDataException, DataAccessException {
         // TODO: check columns changes.
         for(String col : columnRecorder.diff(dataObject.getContent().keySet())) {
             columnRecorder.addColumn(col);
@@ -74,7 +76,7 @@ public class DataRepository {
         return jdbcTemplate.queryForList(cq.SELECT(dataObject));
     }
 
-    public void deleteItem(DataObject dataObject, String table) {
+    public void deleteItem(DataObject dataObject, String table) throws DataAccessException {
         DataQueryGenerator cq = new DataQueryGenerator(table);
         jdbcTemplate.update(cq.DELETE(dataObject));
     }
@@ -84,7 +86,7 @@ public class DataRepository {
         jdbcTemplate.update(cq.DELETEALL());
     }
 
-    public void deleteItem(String id, String table){
+    public void deleteItem(String id, String table) throws DataAccessException {
         DataQueryGenerator cq = new DataQueryGenerator(table);
         jdbcTemplate.update(cq.DELETE(id));
     }
