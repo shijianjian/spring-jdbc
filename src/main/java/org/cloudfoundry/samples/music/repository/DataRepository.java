@@ -46,12 +46,12 @@ public class DataRepository {
 
     public Map<String, Object> findOne(String id, String table) throws EmptyResultDataAccessException {
         DataQueryGenerator cq = new DataQueryGenerator(table);
-        return jdbcTemplate.queryForMap(cq.SELECT(id));
+        return jdbcTemplate.queryForMap(cq.SELECT(id, columnRecorder.getColumns()));
     }
 
     public List<Map<String, Object>> findAll(String table) {
         DataQueryGenerator cq = new DataQueryGenerator(table);
-        return jdbcTemplate.queryForList(cq.SELECT());
+        return jdbcTemplate.queryForList(cq.SELECT(columnRecorder.getColumns()));
     }
 
     public List<Map<String, Object>> save(DataObject dataObject, String table) throws DataAccessException {

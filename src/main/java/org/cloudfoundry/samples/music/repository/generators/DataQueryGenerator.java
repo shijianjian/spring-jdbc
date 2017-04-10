@@ -25,8 +25,8 @@ public class DataQueryGenerator {
         return String.format("SELECT %s FROM %s WHERE id='%s';", field, table, dataObject.getId());
     }
 
-    public String SELECT(String id) {
-//        decryptionBuilder();
+    public String SELECT(String id, List<String> cols) {
+        decryptionBuilder(cols);
         return String.format("SELECT %s FROM %s WHERE id='%s';", field, table, id);
     }
 
@@ -34,8 +34,8 @@ public class DataQueryGenerator {
      * Select all.
      * @return
      */
-    public String SELECT() {
-//        decryptionBuilder();
+    public String SELECT(List<String> cols) {
+        decryptionBuilder(cols);
         return String.format("SELECT %s FROM %s;", field, table);
     }
 
@@ -140,7 +140,7 @@ public class DataQueryGenerator {
         field.append("id");
         value.append("'"+dataObject.getId()+"'");
         for(Map.Entry<String, Object> map : dataObject.getContent().entrySet()) {
-            field.append("," + "PGP_SYM_DECRYPT('" + map.getKey() + "', '" + this.aesKey + "') as " + map.getKey());
+            field.append("," + "PGP_SYM_DECRYPT(" + map.getKey() + "::bytea, '" + this.aesKey + "') as " + map.getKey());
             // in postgres, we use '' instead of '.
             value.append(",'" + map.getValue().toString().replace("'", "''") + "'");
         }
