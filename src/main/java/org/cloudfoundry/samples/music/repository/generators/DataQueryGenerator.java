@@ -14,17 +14,20 @@ public class DataQueryGenerator {
     private String field;
     private String value;
     private String condition;
+    private String aesKey = "775CE8220A5E23BC93E6D72D7419430BD7C4854C0FD49B8347DBDCF70A656FE9";
 
     public DataQueryGenerator(String table) {
         this.table = table;
     }
 
     public String SELECT(DataObject dataObject) {
-        return String.format("SELECT * FROM %s WHERE id='%s';", table, dataObject.getId());
+        decryptionBuilder(dataObject);
+        return String.format("SELECT %s FROM %s WHERE id='%s';", field, table, dataObject.getId());
     }
 
     public String SELECT(String id) {
-        return String.format("SELECT * FROM %s WHERE id='%s';", table, id);
+//        decryptionBuilder();
+        return String.format("SELECT %s FROM %s WHERE id='%s';", field, table, id);
     }
 
     /**
@@ -32,11 +35,12 @@ public class DataQueryGenerator {
      * @return
      */
     public String SELECT() {
-        return String.format("SELECT * FROM %s;", table);
+//        decryptionBuilder();
+        return String.format("SELECT %s FROM %s;", field, table);
     }
 
     public String INSERT(DataObject dataObject) {
-        fieldBuilder(dataObject);
+        encryptionBuilder(dataObject);
         // TODO : if target data has extra columns
         String sql = String.format("INSERT INTO %s (%s) VALUES (%s);", table, field, value);
         System.out.println("sql = " + sql);
@@ -44,7 +48,7 @@ public class DataQueryGenerator {
     }
 
     public String UPDATE(DataObject dataObject) {
-        fieldBuilder(dataObject);
+        encryptionBuilder(dataObject);
         // TODO : if target data has extra columns
         String sql = String.format("UPDATE %s SET (%s) = (%s) WHERE id=%s;", table, field, value, "'" + dataObject.getId() + "'");
         System.out.println("sql = " + sql);
@@ -81,7 +85,9 @@ public class DataQueryGenerator {
         }
         List<String> list = new ArrayList<>();
         for(String field : fields) {
-            list.add("LOWER(" + field + ")");
+            if(!field.equals("id")) {
+                list.add("LOWER(" + "PGP_SYM_DECRYPT(" + field + "::bytea, '" + this.aesKey + "')" + ")");
+            }
         }
         String col = String.join("||", list);
         String[] queryArray = query.trim().split(" ");
@@ -90,8 +96,9 @@ public class DataQueryGenerator {
             condition += String.format("AND ((%s) LIKE LOWER('%%%s%%')) ", col, queryArray[i]);
         }
         condition = condition.substring(condition.indexOf("AND") + "AND".length());
+        decryptionBuilder(fields);
         // using %% to escape %
-        String sql = String.format("SELECT * FROM %s WHERE (%s);", table, condition);
+        String sql = String.format("SELECT %s FROM %s WHERE (%s);", this.field, table, condition);
         System.out.println("sql = " + sql);
         return sql;
     }
@@ -102,12 +109,55 @@ public class DataQueryGenerator {
         field.append("id");
         value.append("'"+dataObject.getId()+"'");
         for(Map.Entry<String, Object> map : dataObject.getContent().entrySet()) {
-                field.append("," + map.getKey());
-                // in postgres, we use '' instead of '.
-                value.append(",'" + map.getValue().toString().replace("'", "''") + "'");
+            if(map.getKey() == "encryption") {
+                continue;
+            }
+            field.append("," + map.getKey());
+            // in postgres, we use '' instead of '.
+            value.append(",'" + map.getValue().toString().replace("'", "''") + "'");
         }
         this.field = field.toString();
         this.value = value.toString();
+    }
+
+    private void encryptionBuilder(DataObject dataObject) {
+        StringBuffer field = new StringBuffer();
+        StringBuffer value = new StringBuffer();
+        field.append("id");
+        value.append("'"+dataObject.getId()+"'");
+        for(Map.Entry<String, Object> map : dataObject.getContent().entrySet()) {
+            field.append("," + map.getKey());
+            // in postgres, we use '' instead of '.
+            value.append("," + "PGP_SYM_ENCRYPT('"+ map.getValue().toString().replace("'", "''") +"', '" + this.aesKey + "')");
+        }
+        this.field = field.toString();
+        this.value = value.toString();
+    }
+
+    private void decryptionBuilder(DataObject dataObject) {
+        StringBuffer field = new StringBuffer();
+        StringBuffer value = new StringBuffer();
+        field.append("id");
+        value.append("'"+dataObject.getId()+"'");
+        for(Map.Entry<String, Object> map : dataObject.getContent().entrySet()) {
+            field.append("," + "PGP_SYM_DECRYPT('" + map.getKey() + "', '" + this.aesKey + "') as " + map.getKey());
+            // in postgres, we use '' instead of '.
+            value.append(",'" + map.getValue().toString().replace("'", "''") + "'");
+        }
+        this.field = field.toString();
+        this.value = value.toString();
+    }
+
+    private void decryptionBuilder(List<String> columns) {
+        StringBuffer field = new StringBuffer();
+        field.append("id");
+        for(String column : columns) {
+            if(!column.equals("id")) {
+                // cast every column into bytea type for Decryption
+                field.append("," + "PGP_SYM_DECRYPT(" + column + "::bytea, '" + this.aesKey + "') as " + column);
+            }
+        }
+        this.field = field.toString();
     }
 
     private void conditionBuilder(DataObject dataObject) {

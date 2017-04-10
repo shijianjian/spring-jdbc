@@ -40,11 +40,12 @@ public class TableInitializer {
 
     @PostConstruct
     private void tableInitialization() {
-        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\"( \"id\" VARCHAR(50) primary key);");
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\"( \"id\" TEXT PRIMARY KEY);");
         try {
-            jdbcTemplate.execute("Alter TABLE " + table + " ADD COLUMN id VARCHAR(50)");
+            jdbcTemplate.execute("Alter TABLE " + table + " ADD COLUMN id TEXT");
         } catch (Exception e) {}
-        jdbcTemplate.execute(String.format("ALTER TABLE %s ALTER COLUMN %s TYPE VARCHAR(50);", table, "id"));
+        jdbcTemplate.execute(String.format("ALTER TABLE %s ALTER COLUMN %s TYPE TEXT;", table, "id"));
+        jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
 
         logger.info("Create/find table '" + table + "'");
     }

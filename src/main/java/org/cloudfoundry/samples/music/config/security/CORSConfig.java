@@ -1,5 +1,8 @@
 package org.cloudfoundry.samples.music.config.security;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.support.ErrorPageFilter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -33,5 +36,18 @@ public class CORSConfig implements Filter {
 
     @Override
     public void destroy() {}
+
+    @Bean
+    public ErrorPageFilter errorPageFilter() {
+        return new ErrorPageFilter();
+    }
+
+    @Bean
+    public FilterRegistrationBean disableSpringBootErrorFilter(ErrorPageFilter filter) {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(filter);
+        filterRegistrationBean.setEnabled(false);
+        return filterRegistrationBean;
+    }
 
 }

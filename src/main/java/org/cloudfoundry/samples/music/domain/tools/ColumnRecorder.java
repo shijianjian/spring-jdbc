@@ -1,7 +1,6 @@
 package org.cloudfoundry.samples.music.domain.tools;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLDataException;
@@ -13,7 +12,6 @@ import java.util.Set;
  * Created by shijian on 07/03/2017.
  */
 @Component
-@Scope("singleton")
 public class ColumnRecorder {
 
     private List<String> columns = new ArrayList();
@@ -73,6 +71,8 @@ public class ColumnRecorder {
     }
 
     public List<String> getColumns() {
+        if(columns == null)
+            return new ArrayList<>();
         return columns;
     }
 

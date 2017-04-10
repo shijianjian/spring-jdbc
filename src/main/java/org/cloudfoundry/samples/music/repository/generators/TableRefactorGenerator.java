@@ -16,7 +16,7 @@ public class TableRefactorGenerator {
     }
 
     public String addColumn(String col) {
-        return String.format("ALTER TABLE %s ADD COLUMN %s varchar(100);", table, col);
+        return String.format("ALTER TABLE %s ADD COLUMN %s TEXT;", table, col);
     }
 
     public String dropColumn(String col) {
